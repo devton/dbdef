@@ -1,0 +1,8 @@
+
+connection_url = 'postgres://postgres:example@localhost:5432/db?sslmode=disable'
+base_path = 'structure'
+
+schemas_filter_regex = 'public'
+tables_filter_regex = '*'
+views_filter_regex = '*'
+functions_filter_regex = '*'
