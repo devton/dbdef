@@ -1,7 +1,7 @@
 [dbdef]
 dev = true
 trace = false
-base_path = './dbdef_report'
+base_path = './report_result'
 
 [repository]
 url = "postgres://postgres:example@127.0.0.1:5432/db"

@@ -1,10 +1,14 @@
 package main
 
 import (
+	"context"
+	"fmt"
+	"io/ioutil"
 	"os"
 
 	"github.com/devton/dbdef/config"
 	"github.com/jackc/pgtype"
+	"github.com/jackc/pgx/v4"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -17,43 +21,52 @@ type Relation struct {
 }
 
 func createDirAll(path string) {
+	contextLog := log.WithFields(log.Fields{
+		"path": path,
+	})
 	if _, err := os.Stat(path); os.IsNotExist(err) {
-		log.WithFields(log.Fields{
-			"path": path,
-		}).Info("os.MkdirAll():")
+		contextLog.Info("createDirAll():")
 		os.MkdirAll(path, 0755)
 	}
+}
+
+func (r *Relation) WriteDefinitionToFile(path string) {
+	contextLog := log.WithFields(log.Fields{
+		"path": path,
+	})
+	//if _, err := os.Stat(path); os.IsNotExist(err) {
+	contextLog.Info("writeFile():")
+	ioutil.WriteFile(path, []byte(r.Definition.String), 0755)
+	//}
 }
 
 func main() {
 	conf := config.New()
 	config.Load(conf)
 	createDirAll(conf.BasePath)
-	//	conn, err := pgx.Connect(context.Background(), conf.ConnectionUrl)
-	//	if err != nil {
-	//		log.Fatal(err)
-	//	}
-	//	defer conn.Close(context.Background())
-	//
-	//	rows, err := conn.Query(context.Background(), structureQuery)
-	//	if err != nil {
-	//		log.Fatal(err)
-	//	}
-	//	defer rows.Close()
-	//
-	//	for rows.Next() {
-	//		var r Relation
-	//		err := rows.Scan(&r.Schema, &r.Relation, &r.Kind, &r.Definition, &r.Signature)
-	//		if err != nil {
-	//			log.Fatal(err)
-	//		}
-	//
-	//		path := fmt.Sprintf("%s/%s/%s", conf.BasePath, r.Schema, r.Kind)
-	//		if _, err := os.Stat(path); os.IsNotExist(err) {
-	//			os.MkdirAll(path, 0755)
-	//		}
-	//		file := fmt.Sprintf("%s/%s.sql", path, r.Relation)
-	//		ioutil.WriteFile(file, []byte(r.Definition.String), 0755)
-	//	}
-	//
+	conn, err := pgx.Connect(context.Background(), conf.GetRepositoryURL())
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer conn.Close(context.Background())
+
+	rows, err := conn.Query(context.Background(), structureQuery)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var r Relation
+		err := rows.Scan(&r.Schema, &r.Relation, &r.Kind, &r.Definition, &r.Signature)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		path := fmt.Sprintf("%s/%s/%s", conf.BasePath, r.Schema, r.Kind)
+		createDirAll(path)
+		file := fmt.Sprintf("%s/%s.sql", path, r.Relation)
+		r.WriteDefinitionToFile(file)
+	}
+
 }
