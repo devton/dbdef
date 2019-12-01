@@ -31,13 +31,12 @@ func createDirAll(path string) {
 }
 
 func (r *Relation) WriteDefinitionToFile(path string) {
+	file := fmt.Sprintf("%s/%s.sql", path, r.Relation)
 	contextLog := log.WithFields(log.Fields{
-		"path": path,
+		"file": file,
 	})
-	//if _, err := os.Stat(path); os.IsNotExist(err) {
 	contextLog.Info("writeFile():")
 	ioutil.WriteFile(path, []byte(r.Definition.String), 0755)
-	//}
 }
 
 func main() {
@@ -65,8 +64,7 @@ func main() {
 
 		path := fmt.Sprintf("%s/%s/%s", conf.BasePath, r.Schema, r.Kind)
 		createDirAll(path)
-		file := fmt.Sprintf("%s/%s.sql", path, r.Relation)
-		r.WriteDefinitionToFile(file)
+		r.WriteDefinitionToFile(path)
 	}
 
 }
