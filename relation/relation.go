@@ -31,7 +31,18 @@ func (r *Relation) WriteDefinitionToFile(path string) {
 	}
 }
 
+func createDirAll(path string) {
+	contextLog := log.WithFields(log.Fields{
+		"path": path,
+	})
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		contextLog.Info("createDirAll():")
+		os.MkdirAll(path, 0755)
+	}
+}
+
 func New(basePath string, repo repository.Repository) {
+	createDirAll(basePath)
 	c, err := repo.GetConn()
 	if err != nil {
 		log.Fatalf("relation.New(): repo.GetConn() err=%w", err)
@@ -51,9 +62,8 @@ func New(basePath string, repo repository.Repository) {
 		}
 
 		path := fmt.Sprintf("%s/%s/%s", basePath, r.Schema, r.Kind)
-		if _, err := os.Stat(path); os.IsNotExist(err) {
-			os.MkdirAll(path, 0755)
-		}
+
+		createDirAll(path)
 		r.WriteDefinitionToFile(path)
 	}
 }
