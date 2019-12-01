@@ -11,7 +11,7 @@ import (
 
 var (
 	configFile        string
-	defaultConfigFile = "./config.toml"
+	defaultConfigFile = "./dbdef.toml"
 )
 
 // RepositoryConfig a config to repository
