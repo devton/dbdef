@@ -2,9 +2,11 @@ package relation
 
 const SQLStruct = `
 select
+	current_database() as dbname,
     n.nspname as schema,
     c.proname as relation,
-    'function' as kind,
+    'functions' as kind,
+	d.description as description,
     c.prosrc as definition,
     'CREATE OR REPLACE FUNCTION '
             || quote_ident(n.nspname) || '.'
@@ -13,6 +15,7 @@ select
             || ')' AS signature
 from pg_catalog.pg_proc c
 join pg_catalog.pg_namespace n on n.oid = c.pronamespace
+left join pg_description d on d.objoid = c.oid
 left join information_schema.views iv on iv.table_name = c.proname and iv.table_schema = n.nspname
 where
   n.nspname in ('public')
@@ -20,16 +23,18 @@ where
   and c.prosrc is not null
 union
 select
+  current_database() as dbname,
   n.nspname as schema,
   c.relname as relation,
   (
     case c.relkind::text
-    when 'v' then 'view'
-    when 'r' then 'table'
-    when 'm' then 'materialized_view'
+    when 'v' then 'views'
+    when 'r' then 'tables'
+    when 'm' then 'materialized_views'
     when 'f' then 'foreign'
      end
   ) as kind,
+  d.description as description,
   (
     case c.relkind::text
     when 'v' then iv.view_definition
@@ -42,6 +47,7 @@ select
 from
   pg_catalog.pg_class c
 join pg_catalog.pg_namespace n on n.oid = c.relnamespace
+left join pg_description d on d.objoid = c.oid
 left join information_schema.views iv on iv.table_name = c.relname and iv.table_schema = n.nspname
 left join lateral (
     SELECT
