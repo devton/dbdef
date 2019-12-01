@@ -1,6 +1,6 @@
-package main
+package relation
 
-var structureQuery = `
+const SQLStruct = `
 select
     n.nspname as schema,
     c.proname as relation,
