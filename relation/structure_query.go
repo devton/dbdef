@@ -51,7 +51,8 @@ left join lateral (
           '    ' || column_name || ' ' ||  type || ' '|| not_null
         )
         , E',\n'
-      ) || E'\n);\n' as definition
+      ) || E'\n);\n\n' ||
+      (SELECT array_to_string((array_agg(indexdef)), E'\n\n') FROM pg_indexes WHERE tablename = relname and schemaname = n.nspname) as definition
     from
     (
       SELECT

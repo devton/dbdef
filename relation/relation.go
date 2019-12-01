@@ -60,9 +60,7 @@ func New(basePath string, repo repository.Repository) {
 		if err != nil {
 			log.Fatal(err)
 		}
-
 		path := fmt.Sprintf("%s/%s/%s", basePath, r.Schema, r.Kind)
-
 		createDirAll(path)
 		r.WriteDefinitionToFile(path)
 	}
