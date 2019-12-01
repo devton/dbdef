@@ -11,6 +11,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// Relation holds the information about definitions of all relations inside a database
 type Relation struct {
 	Schema     string         `db:"schema"`
 	Relation   string         `db:"relation"`
@@ -19,6 +20,7 @@ type Relation struct {
 	Signature  pgtype.Varchar `db:"signature"`
 }
 
+// WriteDefinitionToFile write relation definition to file inside base path
 func (r *Relation) WriteDefinitionToFile(path string) {
 	file := fmt.Sprintf("%s/%s.sql", path, r.Relation)
 	contextLog := log.WithFields(log.Fields{
@@ -31,6 +33,7 @@ func (r *Relation) WriteDefinitionToFile(path string) {
 	}
 }
 
+// createDirAll create dir
 func createDirAll(path string) {
 	contextLog := log.WithFields(log.Fields{
 		"path": path,
@@ -41,16 +44,17 @@ func createDirAll(path string) {
 	}
 }
 
-func New(basePath string, repo repository.Repository) {
+// Start creates structure from database
+func Start(basePath string, repo repository.Repository) {
 	createDirAll(basePath)
 	c, err := repo.GetConn()
 	if err != nil {
-		log.Fatalf("relation.New(): repo.GetConn() err=%w", err)
+		log.Fatalf("relation.Start(): repo.GetConn() err=%w", err)
 	}
 	defer c.Conn.Release()
 	rows, err := c.Conn.Query(context.Background(), SQLStruct)
 	if err != nil {
-		log.Fatalf("relation.New(): err=%w", err)
+		log.Fatalf("relation.Start(): err=%w", err)
 	}
 	defer rows.Close()
 
