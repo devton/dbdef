@@ -84,7 +84,7 @@ func Start(conf *config.Config, repo repository.Repository) {
 		sqlToRun = SQLStructPG11
 	}
 
-	rows, err := c.Conn.Query(context.Background(), sqlToRun)
+	rows, err := c.Conn.Query(context.Background(), sqlToRun, conf.Repository.SchemasFilter)
 	if err != nil {
 		log.Fatalf("relation.Start(): err=%w", err)
 	}
