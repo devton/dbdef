@@ -34,7 +34,7 @@ func (r *Relation) WriteDefinitionFile(path string) {
 	contextLog := log.WithFields(log.Fields{
 		"file": file,
 	})
-	contextLog.Info("WriteDefinitionFile():")
+	contextLog.Debugf("WriteDefinitionFile():")
 	err := ioutil.WriteFile(file, []byte(r.Definition.String), 0755)
 	if err != nil {
 		contextLog.Fatal(err)
@@ -63,7 +63,7 @@ func createDirAll(path string) {
 		"dir": path,
 	})
 	if _, err := os.Stat(path); os.IsNotExist(err) {
-		contextLog.Info("createDirAll():")
+		contextLog.Debugf("createDirAll():")
 		os.MkdirAll(path, 0755)
 	}
 }
