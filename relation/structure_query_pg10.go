@@ -1,13 +1,13 @@
 package relation
 
-const SQLStruct = `
+const SQLStructPG10 = `
 select
 	current_database() as dbname,
     n.nspname as schema,
     c.proname as relation,
     'functions' as kind,
 	d.description as description,
-    c.prosrc as definition,
+	(case when not c.proisagg then pg_get_functiondef(c.oid) else c.prosrc end) as definition,
     'CREATE OR REPLACE FUNCTION '
             || quote_ident(n.nspname) || '.'
             || quote_ident(c.proname) || '('
@@ -18,8 +18,9 @@ join pg_catalog.pg_namespace n on n.oid = c.pronamespace
 left join pg_description d on d.objoid = c.oid
 left join information_schema.views iv on iv.table_name = c.proname and iv.table_schema = n.nspname
 where
-  n.nspname in ('public')
-  and c.probin is null
+  -- n.nspname in ('public')
+  -- and 
+  c.probin is null
   and c.prosrc is not null
 union
 select
@@ -82,5 +83,5 @@ left join lateral (
 ) as tbdef on c.relkind = 'r'
 where
   c.relkind in ('r', 'v', 'm', 'f')
-  and n.nspname in ('public')
+  -- and n.nspname in ('public')
 `

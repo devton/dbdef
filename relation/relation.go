@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 
+	"github.com/devton/dbdef/config"
 	"github.com/devton/dbdef/repository"
 	"github.com/jackc/pgtype"
 	log "github.com/sirupsen/logrus"
@@ -68,14 +69,22 @@ func createDirAll(path string) {
 }
 
 // Start creates structure from database
-func Start(basePath string, repo repository.Repository) {
-	createDirAll(basePath)
+func Start(conf *config.Config, repo repository.Repository) {
+	createDirAll(conf.BasePath)
 	c, err := repo.GetConn()
 	if err != nil {
 		log.Fatalf("relation.Start(): repo.GetConn() err=%w", err)
 	}
 	defer c.Conn.Release()
-	rows, err := c.Conn.Query(context.Background(), SQLStruct)
+
+	var sqlToRun string
+	if conf.Repository.MajorVersion <= 10 {
+		sqlToRun = SQLStructPG10
+	} else {
+		sqlToRun = SQLStructPG11
+	}
+
+	rows, err := c.Conn.Query(context.Background(), sqlToRun)
 	if err != nil {
 		log.Fatalf("relation.Start(): err=%w", err)
 	}
@@ -87,7 +96,7 @@ func Start(basePath string, repo repository.Repository) {
 		if err != nil {
 			log.Fatal(err)
 		}
-		path := fmt.Sprintf("%s/%s", basePath, r.GetDirPath())
+		path := fmt.Sprintf("%s/%s", conf.BasePath, r.GetDirPath())
 		createDirAll(path)
 		r.WriteDefinitionFile(path)
 		r.WriteFirstReadme(path)

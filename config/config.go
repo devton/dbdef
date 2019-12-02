@@ -16,6 +16,7 @@ var (
 
 // RepositoryConfig a config to repository
 type RepositoryConfig struct {
+	MajorVersion    int
 	URL             string
 	SchemasFilter   string
 	TablesFilter    string
@@ -73,6 +74,7 @@ func parse(cfg *Config) (err error) {
 	cfg.Dev = viper.GetBool("dbdef.dev")
 	cfg.Trace = viper.GetBool("dbdef.trace")
 	cfg.BasePath = viper.GetString("dbdef.base_path")
+	cfg.Repository.MajorVersion = viper.GetInt("repository.major_version")
 	cfg.Repository.URL = viper.GetString("repository.url")
 	cfg.Repository.SchemasFilter = viper.GetString("repository.schemas_filter")
 	cfg.Repository.TablesFilter = viper.GetString("repository.tables_filter")

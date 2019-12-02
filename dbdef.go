@@ -15,5 +15,5 @@ func main() {
 	defer repo.Close()
 	log.Debugf("main(): repo=%+v", repo)
 
-	relation.Start(conf.BasePath, repo)
+	relation.Start(conf, repo)
 }

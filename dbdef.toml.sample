@@ -4,6 +4,7 @@ trace = false
 base_path = './report_result'
 
 [repository]
+major_version = 11
 url = "postgres://postgres:example@127.0.0.1:5432/db"
 schemas_filter = 'public'
 tables_filter = '*'
